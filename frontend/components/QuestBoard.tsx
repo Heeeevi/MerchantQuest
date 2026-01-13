@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { 
+  Quest,
   DailyQuest, 
   Achievement,
   TUTORIAL_QUESTS, 
@@ -52,6 +53,73 @@ export default function QuestBoard({
     data: { merchantName: string; achievementName: string; achievementIcon: string };
   } | null>(null);
   const [claimingId, setClaimingId] = useState<string | null>(null);
+
+  // Helper function to calculate daily quest progress
+  const getDailyQuestProgress = useCallback((quest: DailyQuest): number => {
+    if (quest.completed) return 100;
+    
+    switch (quest.type) {
+      case 'trade':
+        if (quest.requirements.tradeCount) {
+          return Math.min((totalTrades / quest.requirements.tradeCount) * 100, 100);
+        }
+        break;
+      case 'profit':
+        if (quest.requirements.profitAmount) {
+          return Math.min((totalProfit / quest.requirements.profitAmount) * 100, 100);
+        }
+        break;
+      case 'travel':
+        if (quest.requirements.visitCities) {
+          const visited = quest.requirements.visitCities.filter(c => citiesVisited.includes(c)).length;
+          return Math.min((visited / quest.requirements.visitCities.length) * 100, 100);
+        }
+        if (quest.requirements.targetCity !== undefined) {
+          return currentCity === quest.requirements.targetCity ? 100 : 0;
+        }
+        break;
+      case 'delivery':
+        // For delivery quests, check if player has the commodity and is in target city
+        if (quest.requirements.targetCity !== undefined) {
+          const inTargetCity = currentCity === quest.requirements.targetCity;
+          return inTargetCity ? 50 : 25; // Simplified - would need inventory check
+        }
+        break;
+      case 'collect':
+        if (quest.requirements.profitAmount) {
+          return Math.min((gold / quest.requirements.profitAmount) * 100, 100);
+        }
+        break;
+    }
+    return 0;
+  }, [totalTrades, totalProfit, citiesVisited, currentCity, gold]);
+
+  // Helper function to calculate tutorial quest progress
+  const getTutorialQuestProgress = useCallback((quest: Quest): number => {
+    switch (quest.type) {
+      case 'trade':
+        if (quest.requirements.quantity) {
+          return Math.min((totalTrades / quest.requirements.quantity) * 100, 100);
+        }
+        return totalTrades > 0 ? 100 : 0;
+      case 'travel':
+        if (quest.requirements.targetCity !== undefined) {
+          return currentCity === quest.requirements.targetCity ? 100 : 0;
+        }
+        if (quest.requirements.visitCities) {
+          const visited = quest.requirements.visitCities.filter((c: number) => citiesVisited.includes(c)).length;
+          return Math.min((visited / quest.requirements.visitCities.length) * 100, 100);
+        }
+        break;
+      case 'profit':
+        if (quest.requirements.profitAmount) {
+          return Math.min((totalProfit / quest.requirements.profitAmount) * 100, 100);
+        }
+        break;
+    }
+    return 0;
+  }, [totalTrades, totalProfit, citiesVisited, currentCity]);
+
 
   useEffect(() => {
     setGameProgress(getProgress());
@@ -214,8 +282,155 @@ export default function QuestBoard({
         </div>
       )}
 
-      {activeTab === 'daily' && <div className="text-center py-8 text-gray-500">Daily quests coming soon!</div>}
-      {activeTab === 'tutorial' && <div className="text-center py-8 text-gray-500">Tutorial steps coming soon!</div>}
+      {activeTab === 'daily' && (
+        <div className="space-y-3">
+          {dailyQuests.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">Loading daily quests...</div>
+          ) : (
+            dailyQuests.map((quest, index) => {
+              const progress = getDailyQuestProgress(quest);
+              const isCompleted = quest.completed || progress >= 100;
+              return (
+                <div key={quest.id || index} className={`p-4 rounded-lg border-2 transition-all ${isCompleted ? 'bg-green-50 border-green-300' : 'bg-white border-amber-200 hover:border-amber-400'}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl flex-shrink-0">{quest.icon}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className={`font-bold ${isCompleted ? 'text-green-700' : 'text-amber-700'}`}>{quest.title}</h4>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          quest.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
+                          quest.difficulty === 'medium' ? 'bg-amber-100 text-amber-700' :
+                          quest.difficulty === 'hard' ? 'bg-red-100 text-red-700' :
+                          'bg-purple-100 text-purple-700'
+                        }`}>{quest.difficulty}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{quest.description}</p>
+                      
+                      {/* Progress Bar */}
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>Progress</span>
+                          <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all ${isCompleted ? 'bg-green-500' : 'bg-amber-500'}`} 
+                            style={{width: `${Math.min(progress, 100)}%`}} 
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Rewards */}
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-3 text-sm">
+                          <span className="text-amber-600">🪙 {quest.rewards.gold}g</span>
+                          <span className="text-purple-600">⭐ {quest.rewards.experience}xp</span>
+                        </div>
+                        {isCompleted ? (
+                          <span className="text-green-600 font-bold text-sm flex items-center gap-1">
+                            ✅ Completed
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">In Progress</span>
+                        )}
+                      </div>
+                      
+                      {/* Lesson */}
+                      {quest.lesson && (
+                        <div className="mt-3 p-2 bg-amber-50 rounded border border-amber-200">
+                          <p className="text-xs text-amber-700">💡 {quest.lesson}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+      
+      {activeTab === 'tutorial' && (
+        <div className="space-y-3">
+          {TUTORIAL_QUESTS.map((quest, index) => {
+            const isCompleted = index < tutorialStep;
+            const isCurrent = index === tutorialStep;
+            const isLocked = index > tutorialStep;
+            const progress = isCurrent ? getTutorialQuestProgress(quest) : (isCompleted ? 100 : 0);
+            
+            return (
+              <div 
+                key={quest.id} 
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  isCompleted ? 'bg-green-50 border-green-300' : 
+                  isCurrent ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300' : 
+                  'bg-gray-50 border-gray-200 opacity-60'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`text-3xl flex-shrink-0 ${isLocked ? 'grayscale opacity-50' : ''}`}>
+                    {isCompleted ? '✅' : quest.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className={`font-bold ${
+                        isCompleted ? 'text-green-700' : 
+                        isCurrent ? 'text-amber-700' : 
+                        'text-gray-400'
+                      }`}>
+                        {isLocked ? '🔒 ' : ''}{quest.title}
+                      </h4>
+                      <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">
+                        Step {index + 1}/{TUTORIAL_QUESTS.length}
+                      </span>
+                    </div>
+                    <p className={`text-sm mt-1 ${isLocked ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {quest.description}
+                    </p>
+                    
+                    {/* Progress Bar - only for current */}
+                    {isCurrent && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>Progress</span>
+                          <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-amber-500 transition-all" 
+                            style={{width: `${Math.min(progress, 100)}%`}} 
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Rewards */}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <span className={isLocked ? 'text-gray-400' : 'text-amber-600'}>🪙 {quest.rewards.gold}g</span>
+                        <span className={isLocked ? 'text-gray-400' : 'text-purple-600'}>⭐ {quest.rewards.experience}xp</span>
+                      </div>
+                      {isCompleted && (
+                        <span className="text-green-600 font-bold text-sm">✅ Done</span>
+                      )}
+                      {isCurrent && (
+                        <span className="text-amber-600 font-bold text-sm animate-pulse">👉 Current</span>
+                      )}
+                    </div>
+                    
+                    {/* Lesson */}
+                    {quest.lesson && !isLocked && (
+                      <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                        <p className="text-xs text-blue-700">📚 {quest.lesson}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {showShareModal && shareData && <ShareAchievement type={shareData.type} data={shareData.data} onClose={() => { setShowShareModal(false); setShareData(null); }} />}
     </div>
