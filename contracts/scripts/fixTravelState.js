@@ -2,8 +2,8 @@
 const hre = require("hardhat");
 
 async function main() {
-  const playerAddress = "0x70D0D4378dAA33cc453666931a74C75e355c478e";
-  const gameWorldAddress = "0xe68b0859542A9177543b4741757EFb7638De3E17";
+  const playerAddress = process.env.PLAYER_ADDRESS || "0x70D0D4378dAA33cc453666931a74C75e355c478e";
+  const gameWorldAddress = "0x123dCDD6AA44D14db9a2B1118F588286f9FC0d05"; // Updated GameWorld address
 
   console.log("=".repeat(60));
   console.log("🔧 MerchantQuest - Fix Travel State Tool");

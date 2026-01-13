@@ -79,13 +79,16 @@ export default function WorldMap({ currentCity, gold, onTravel, onTrade }: World
     ? (merchantData as unknown as [bigint, { name: string }])[1]?.name 
     : 'Merchant';
 
-  // Travel status from blockchain
+  // Travel status from blockchain - auto-refresh every 3 seconds during travel
   const { data: travelStatus, refetch: refetchTravelStatus } = useReadContract({
     address: CONTRACT_ADDRESSES.gameWorld,
     abi: GAME_WORLD_ABI,
     functionName: 'getTravelStatus',
     args: merchantId ? [merchantId] : undefined,
-    query: { enabled: !!merchantId },
+    query: { 
+      enabled: !!merchantId,
+      refetchInterval: travelPhase === 'traveling' || travelPhase === 'completing' ? 3000 : false,
+    },
   });
 
   // City prices for current city
@@ -136,45 +139,77 @@ export default function WorldMap({ currentCity, gold, onTravel, onTrade }: World
     hash: tradeHash,
   });
 
-  // Detect stuck travel from blockchain
+  // Sync travel state from blockchain (SINGLE SOURCE OF TRUTH)
   useEffect(() => {
-    if (travelStatus && travelPhase === 'idle') {
-      const [isTraveling, , toCity, timeRemaining] = travelStatus as [boolean, bigint, bigint, bigint];
+    if (!travelStatus) return;
+    
+    const [isTraveling, , toCity, timeRemaining] = travelStatus as [boolean, bigint, bigint, bigint];
+    
+    if (isTraveling) {
+      setSelectedCityId(Number(toCity));
+      const remaining = Number(timeRemaining);
       
-      if (isTraveling) {
-        setStuckTravelDetected(true);
-        setSelectedCityId(Number(toCity));
-        
-        const remaining = Number(timeRemaining);
-        if (remaining > 0) {
-          setTravelPhase('traveling');
-          setTravelTimeRemaining(remaining);
-        } else {
+      if (remaining > 0) {
+        // Still traveling - update time from blockchain
+        setTravelPhase('traveling');
+        setTravelTimeRemaining(remaining);
+      } else {
+        // Ready to complete - time has passed on blockchain
+        if (travelPhase !== 'completing') {
           setTravelPhase('completing');
           setTravelTimeRemaining(0);
         }
       }
+    } else if (travelPhase !== 'idle' && travelPhase !== 'starting') {
+      // Travel completed on blockchain - reset state
+      setTravelPhase('idle');
+      setTravelTimeRemaining(0);
+      setStuckTravelDetected(false);
     }
-  }, [travelStatus, travelPhase]);
+  }, [travelStatus]);
 
   // Update BGM when city changes
   useEffect(() => {
     setAudioCity(currentCity);
   }, [currentCity, setAudioCity]);
 
-  // Handle errors
+  // Handle errors - allow retry
   useEffect(() => {
     if (startError) {
-      setError(startError.message.includes('user rejected') ? 'Transaction cancelled' : 'Travel failed');
+      const msg = startError.message || '';
+      if (msg.includes('user rejected') || msg.includes('rejected')) {
+        setError('Transaction cancelled');
+      } else if (msg.includes('Already traveling')) {
+        setError('Already traveling - please wait');
+        refetchTravelStatus(); // Sync with blockchain
+      } else {
+        setError('Travel failed: ' + msg.slice(0, 100));
+      }
       setTravelPhase('idle');
       localStorage.removeItem(TRAVEL_STATE_KEY);
     }
     if (completeError) {
-      setError('Failed to complete travel');
-      setTravelPhase('idle');
+      const msg = completeError.message || '';
+      if (msg.includes('Still traveling')) {
+        // Not ready yet - go back to traveling phase and wait
+        setError('Still traveling - please wait');
+        setTravelPhase('traveling');
+        setCompleteCalled(false); // Allow retry
+        refetchTravelStatus();
+      } else if (msg.includes('Not traveling')) {
+        // Already completed - just reset
+        setTravelPhase('idle');
+        setCompleteCalled(false);
+        refetchTravelStatus();
+        onTravel();
+      } else {
+        setError('Failed to complete travel');
+        setTravelPhase('idle');
+        setCompleteCalled(false);
+      }
       localStorage.removeItem(TRAVEL_STATE_KEY);
     }
-  }, [startError, completeError]);
+  }, [startError, completeError, refetchTravelStatus, onTravel]);
 
   // Travel times - SHORT for better UX (5-10 seconds)
   const travelTimes: Record<number, Record<number, number>> = {
@@ -186,34 +221,36 @@ export default function WorldMap({ currentCity, gold, onTravel, onTrade }: World
 
   const getTravelTime = (from: number, to: number) => travelTimes[from]?.[to] || 5;
 
-  // Handle start travel success
+  // Handle start travel success - just trigger refetch
   useEffect(() => {
     if (isStartSuccess && selectedCityId !== null && merchantId) {
-      const duration = getTravelTime(currentCity, selectedCityId);
-      
+      // Store minimal state for recovery
       const travelState: StoredTravelState = {
         merchantId: merchantId.toString(),
         selectedCity: selectedCityId,
         startTime: Date.now(),
-        travelDuration: duration,
+        travelDuration: getTravelTime(currentCity, selectedCityId),
         phase: 'traveling',
       };
       localStorage.setItem(TRAVEL_STATE_KEY, JSON.stringify(travelState));
       
-      setTravelPhase('traveling');
-      setTravelTimeRemaining(duration);
+      // Immediately refetch blockchain status (source of truth)
+      refetchTravelStatus();
       setError(null);
     }
-  }, [isStartSuccess, selectedCityId, merchantId, currentCity]);
+  }, [isStartSuccess, selectedCityId, merchantId, currentCity, refetchTravelStatus]);
 
-  // Countdown timer
+  // Countdown timer - sync with blockchain every 2 seconds
   useEffect(() => {
-    if (travelPhase !== 'traveling' || travelTimeRemaining <= 0) return;
+    if (travelPhase !== 'traveling') return;
 
     const timer = setInterval(() => {
+      // Refetch from blockchain for accuracy
+      refetchTravelStatus();
+      
+      // Local countdown for smooth UI
       setTravelTimeRemaining(prev => {
         if (prev <= 1) {
-          setTravelPhase('completing');
           return 0;
         }
         return prev - 1;
@@ -221,23 +258,34 @@ export default function WorldMap({ currentCity, gold, onTravel, onTrade }: World
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [travelPhase, travelTimeRemaining]);
+  }, [travelPhase, refetchTravelStatus]);
 
-  // Auto-complete travel
+  // Auto-complete travel - only call ONCE when ready
+  const [completeCalled, setCompleteCalled] = useState(false);
+  
   const handleCompleteTravel = useCallback(() => {
+    if (completeCalled) return; // Prevent multiple calls
+    setCompleteCalled(true);
+    
     completeTravelWrite({
       address: CONTRACT_ADDRESSES.gameWorld,
       abi: GAME_WORLD_ABI,
       functionName: 'completeTravel',
       args: [],
     });
-  }, [completeTravelWrite]);
+  }, [completeTravelWrite, completeCalled]);
 
   useEffect(() => {
-    if (travelPhase === 'completing' && !isCompletePending && !isCompleteConfirming) {
+    // Only auto-complete when phase is 'completing' and not already pending/confirming
+    if (travelPhase === 'completing' && !isCompletePending && !isCompleteConfirming && !completeCalled) {
       handleCompleteTravel();
     }
-  }, [travelPhase, isCompletePending, isCompleteConfirming, handleCompleteTravel]);
+    
+    // Reset completeCalled when travel is done
+    if (travelPhase === 'idle') {
+      setCompleteCalled(false);
+    }
+  }, [travelPhase, isCompletePending, isCompleteConfirming, handleCompleteTravel, completeCalled]);
 
   // Handle travel complete success
   useEffect(() => {
