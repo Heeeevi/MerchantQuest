@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./PriceOracle.sol";
+import "./interfaces/IPriceOracle.sol";
 import "./MerchantNFT.sol";
 
 /**
@@ -18,7 +18,7 @@ import "./MerchantNFT.sol";
 contract GameWorld is Ownable {
     
     // ============ CONTRACT REFERENCES ============
-    PriceOracle public priceOracle;
+    IPriceOracle public priceOracle;
     MerchantNFT public merchantNFT;
     
     // ============ CONSTANTS ============
@@ -103,7 +103,7 @@ contract GameWorld is Ownable {
     // ============ CONSTRUCTOR ============
     
     constructor(address _priceOracle, address _merchantNFT) Ownable(msg.sender) {
-        priceOracle = PriceOracle(_priceOracle);
+        priceOracle = IPriceOracle(_priceOracle);
         merchantNFT = MerchantNFT(_merchantNFT);
         
         _initializeCities();

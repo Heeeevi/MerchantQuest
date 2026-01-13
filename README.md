@@ -11,9 +11,9 @@ A medieval trading RPG where in-game commodity prices mirror real-world markets 
 
 | Contract | Address |
 |----------|---------|
-| PriceOracle | `0xDed455727B2E4994a91787a311B21BCE5fF1019B` |
-| MerchantNFT | `0xCC0a0458FE337e93598bCc74035598Cf7d3CcF3E` |
-| GameWorld | `0x552bF0c0310EfBe3C3FAC2cC618fffD0dd9b2013` |
+| PriceOracleV2 (Pyth) | `0xf8273354D96b5852a86c8E1EBe7dF2bDbcaFEd1B` |
+| MerchantNFT | `0xB8789618962E5F43865be8A6EE0b2e8c1CC5d738` |
+| GameWorld | `0x123dCDD6AA44D14db9a2B1118F588286f9FC0d05` |
 
 ## 🎯 Problem We're Solving
 
@@ -118,10 +118,33 @@ cd frontend && npm run dev
 
 ## 🔮 Oracle System
 
-The PriceOracle uses a **"Chaos Multiplier"** system:
-- Real market trends are amplified 3x for exciting gameplay
-- Game events (dragon attacks, harvests) create additional volatility
-- Prices update periodically by the game operator
+The PriceOracleV2 integrates with **Pyth Network** for real-time market data!
+
+### Real Data Integration
+| Game Commodity | Real-World Price Feed | Source |
+|----------------|----------------------|--------|
+| 🪙 Gold | XAU/USD | Real gold spot price |
+| 🌾 Wheat | ETH/USD proxy | Scaled crypto price |
+| 🧵 Silk | ETH/USD proxy | Luxury goods proxy |
+| 🌶️ Spices | XAG/USD | Silver as historical proxy |
+| ⚔️ Iron | WTI/USD | Oil as industrial proxy |
+
+### How It Works
+```
+Final Price = Base × (1 + AmplifiedDelta) × EventModifier
+
+Where:
+- Base = Starting game price (Gold=100, Wheat=10, etc.)
+- AmplifiedDelta = Real market move × 3 (Chaos Multiplier)
+- EventModifier = Game events (dragon attacks, harvests)
+```
+
+**Example:** If real gold (XAU) moves +2%, game Gold price moves +6%!
+
+### Pyth Network Info
+- **Mantle Sepolia:** `0x98046Bd286715D3B0BC227Dd7a956b83D8978603`
+- Prices update in real-time from decentralized oracle
+- Fallback mode available if Pyth data is stale
 
 ### Update Oracle (Admin Only)
 ```bash
@@ -151,9 +174,9 @@ Add these in Netlify Dashboard → Site Settings → Environment Variables:
 
 | Variable | Value |
 |----------|-------|
-| `NEXT_PUBLIC_PRICE_ORACLE_ADDRESS` | `0xDed455727B2E4994a91787a311B21BCE5fF1019B` |
-| `NEXT_PUBLIC_MERCHANT_NFT_ADDRESS` | `0xCC0a0458FE337e93598bCc74035598Cf7d3CcF3E` |
-| `NEXT_PUBLIC_GAME_WORLD_ADDRESS` | `0x552bF0c0310EfBe3C3FAC2cC618fffD0dd9b2013` |
+| `NEXT_PUBLIC_PRICE_ORACLE_ADDRESS` | `0xf8273354D96b5852a86c8E1EBe7dF2bDbcaFEd1B` |
+| `NEXT_PUBLIC_MERCHANT_NFT_ADDRESS` | `0xB8789618962E5F43865be8A6EE0b2e8c1CC5d738` |
+| `NEXT_PUBLIC_GAME_WORLD_ADDRESS` | `0x123dCDD6AA44D14db9a2B1118F588286f9FC0d05` |
 | `NEXT_PUBLIC_CHAIN_ID` | `5003` |
 | `NEXT_PUBLIC_CHAIN_NAME` | `Mantle Sepolia` |
 | `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | Get from [cloud.walletconnect.com](https://cloud.walletconnect.com) |
