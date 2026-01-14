@@ -1,24 +1,40 @@
 # MerchantQuest - Pitch Video Script (5 Minutes)
 
-## 📊 Market Data Reference
-- Global gaming market: $200+ billion (2025)
-- Blockchain gaming market: $65 billion projected by 2027
-- 70% of Web3 games fail within 3 months of launch
-- Only 2% of traditional gamers have tried blockchain games
-- 89% player churn rate in Web3 games vs 45% in traditional games
-- Average session time: Web3 games 8 min vs Traditional games 45 min
+## 📊 VERIFIED MARKET DATA (With Sources)
+
+### Gaming Industry (Verified)
+| Data | Value | Source |
+|------|-------|--------|
+| Global Gaming Revenue 2024 | **$455 billion** | Statista, Nov 2024 |
+| Global Gaming Revenue 2025 | **$188.8 billion** (consumer spend) | Newzoo Global Games Market Report 2025 |
+| Global Players 2025 | **3.6 billion** | Newzoo Global Games Market Report 2025 |
+| Projected Players 2028 | **3.9 billion** | Newzoo Global Games Market Report 2025 |
+
+### Web3 Gaming Problems (Expert Quotes - Verified)
+| Quote | Source |
+|-------|--------|
+| "The player perception [of Web3] right now is negative" | Greg Canessa, Sequence COO (ex-Xbox Live Arcade GM), GamesBeat Jan 2024 |
+| "The lack of innovation in terms of application of this technology in novel and interesting ways to make fun games is part of the reason why the player perception is negative" | Greg Canessa, GamesBeat |
+| "People latch onto NFTs, but without interesting utility the people are just speculating, which brings in degenerate behavior" | Greg Canessa, GamesBeat |
+| "The industry is facing issues of distribution, privacy, ownership, access... Game companies are laying people off, going out of business, pulling games, and communities are having games ripped away from them" | Greg Canessa, GamesBeat |
+| "The [Web3 gaming] industry is still in its infancy. It hasn't found a killer app. It's still very early" | Greg Canessa, GamesBeat |
+
+### Developer Interest (Verified)
+| Data | Value | Source |
+|------|-------|--------|
+| Game developers interested in blockchain/NFT/Web3 | **See latest survey** | Statista - "Global game developers level of interest in blockchain tech 2024" |
 
 ---
 
-## 🎬 SCRIPT
+## 🎬 SCRIPT (REVISED WITH VERIFIED DATA)
 
 ### [0:00-0:30] HOOK - The Problem
 
 **[VISUAL: News headlines about failed Web3 games, empty game lobbies, angry Twitter posts]**
 
-> "The Web3 gaming industry has a dirty secret.
+> "The Web3 gaming industry has a fundamental problem.
 > 
-> Despite $4 billion invested in blockchain games over the past two years, 70% of these games fail within their first three months.
+> Despite billions invested in blockchain games, the industry — in the words of a gaming veteran who created Xbox Live Arcade — 'still hasn't found a killer app.'
 > 
 > Why? Because the industry got it completely backwards.
 > 
@@ -30,22 +46,21 @@
 
 **[VISUAL: Side-by-side comparison - Traditional game fun moments vs Web3 game wallet popups and charts]**
 
-> "Let me paint you a picture.
+> "Let me share what Greg Canessa, the former GM who created Xbox Live Arcade and now COO of Sequence, said about Web3 gaming:
 > 
-> A traditional gamer downloads a new game. Within 5 minutes, they're slaying dragons, building empires, or racing cars. Pure fun.
+> *'The player perception right now is negative. The lack of innovation in terms of application of this technology in novel and interesting ways to make fun games is part of the reason.'*
 > 
-> Now, a gamer tries a Web3 game. Within 5 minutes? They're setting up wallets, buying tokens, approving transactions, watching gas fees... and they haven't even started playing yet.
+> He continues: *'People latched onto NFTs, but without interesting utility, people are just speculating — which brings in degenerate behavior.'*
 > 
 > **[PAUSE FOR EFFECT]**
 > 
-> The data is brutal:
-> - 89% of players abandon Web3 games within the first week
-> - Average gameplay session? Just 8 minutes. Compare that to 45 minutes for traditional games
-> - And here's the kicker: only 2% of the 3 billion gamers worldwide have ever tried a blockchain game
+> Think about it. There are 3.6 billion gamers worldwide spending nearly 200 billion dollars annually on games. That's according to Newzoo's 2025 Global Games Market Report.
 > 
-> The problem isn't blockchain technology. The problem is that Web3 games forgot their primary job: to be FUN first.
+> Yet Web3 gaming hasn't captured this massive audience. Why?
 > 
-> Speculation became the gameplay. Trading replaced adventuring. And players? They left."
+> Because when a traditional gamer tries a blockchain game, within 5 minutes they're setting up wallets, buying tokens, approving transactions, watching gas fees... and they haven't even started playing yet.
+> 
+> The problem isn't blockchain technology. The problem is that Web3 games forgot their primary job: to be FUN first."x  
 
 ---
 
@@ -135,7 +150,7 @@
 > - Early community members who want to shape the game's future
 > - Feedback from judges who can help us refine our vision
 > 
-> The 3 billion gamers out there? They're not opposed to blockchain. They're waiting for a blockchain game worth playing."
+> The 3.6 billion gamers out there? They're not opposed to blockchain. They're waiting for a blockchain game worth playing."
 
 ---
 
@@ -149,23 +164,57 @@
 
 ---
 
-## 🎯 KEY TALKING POINTS TO EMPHASIZE
+## 📚 FULL REFERENCES
 
-1. **Problem-Solution Fit**: Web3 games fail because they prioritize speculation over fun
-2. **Differentiation**: Real oracle data, sustainable economy, fun-first design
-3. **Technical Achievement**: Built on Mantle with Pyth oracles in 48 hours
-4. **Market Opportunity**: Only 2% of gamers have tried Web3 - massive untapped market
-5. **Vision**: Template for future Web3 game development
+### Primary Sources
+
+1. **Statista - Video Game Industry Statistics & Facts**
+   - URL: https://www.statista.com/topics/868/video-games/
+   - Data: Global gaming revenue 2024 = ~$455 billion
+   - Published: November 2024
+
+2. **Newzoo Global Games Market Report 2025**
+   - URL: https://newzoo.com/resources/trend-reports/newzoo-global-games-market-report-2025
+   - Data: $188.8B revenue in 2025, 3.6B players, projected 3.9B by 2028
+   - Published: September 2025
+
+3. **GamesBeat / VentureBeat - Greg Canessa Interview**
+   - URL: https://gamesbeat.com/web3-gaming-firm-sequence-names-game-veteran-greg-canessa-as-coo/
+   - Author: Dean Takahashi
+   - Published: January 25, 2024 (Updated June 2025)
+   - Key quotes about Web3 gaming problems and player perception
+
+### Key Expert: Greg Canessa
+- **Current Role**: President & COO, Sequence (Web3 gaming platform)
+- **Previous Roles**: 
+  - GM & Creator of Xbox Live Arcade, Microsoft (2000-2007)
+  - Global Director of Strategy & Business Operations for Games, Google (2017-2023)
+  - Project Director of Battle.net, Blizzard Entertainment
+  - VP Mobile, Activision Blizzard
+- **Credibility**: 25+ years in gaming industry, created first console digital distribution business
 
 ---
 
-## 📌 STATS TO DISPLAY ON SCREEN
+## 🎯 KEY TALKING POINTS TO EMPHASIZE
 
-| Stat | Number | Context |
-|------|--------|---------|
-| Web3 Game Failure Rate | 70% | Within 3 months |
-| Player Churn (Web3) | 89% | vs 45% traditional |
-| Avg Session (Web3) | 8 min | vs 45 min traditional |
-| Gamers Who Tried Web3 | 2% | Of 3 billion total |
+1. **Problem-Solution Fit**: Web3 games fail because they prioritize speculation over fun (backed by expert quote)
+2. **Market Size**: 3.6 billion gamers, $188.8B market (Newzoo 2025)
+3. **Differentiation**: Real oracle data, sustainable economy, fun-first design
+4. **Technical Achievement**: Built on Mantle with Pyth oracles in 48 hours
+5. **Expert Validation**: Our approach aligns with what industry veterans say is needed
+
+---
+
+## 📌 STATS TO DISPLAY ON SCREEN (ALL VERIFIED)
+
+| Stat | Number | Source |
+|------|--------|--------|
+| Global Gamers | 3.6 billion | Newzoo 2025 |
+| Gaming Market Size | $188.8B | Newzoo 2025 |
+| Projected Gamers 2028 | ~3.9 billion | Newzoo 2025 |
 | MerchantQuest Build Time | 48 hours | Hackathon |
+
+### Quote to Display:
+> *"The player perception [of Web3] right now is negative... The lack of innovation in making fun games is part of the reason."*
+> — Greg Canessa, ex-Xbox Live Arcade GM
 
